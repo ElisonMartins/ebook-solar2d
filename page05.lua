@@ -27,7 +27,7 @@ function scene:create( event )
 
     btnNext:addEventListener("tap", function(event)
         print("next")
-        composer.gotoScene("contraCapa", { effect = "fade" })
+        composer.gotoScene("page06", { effect = "fade" })
     end)
 
     -- Botão "Prev"
