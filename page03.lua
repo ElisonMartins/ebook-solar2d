@@ -1,7 +1,7 @@
 local composer = require("composer")
 local scene = composer.newScene()
 
--- Variáveis para controle da imagem
+
 local currentImageIndex = 1
 local giraffeImages = {
     "assets/p3/girafa1.png",
@@ -11,62 +11,58 @@ local giraffeImages = {
 }
 local giraffeImage
 
--- Função para redefinir a imagem para a primeira
-local function resetToFirstImage()
-    currentImageIndex = 1 -- Reinicia o índice para a primeira imagem
 
-    -- Remove a imagem atual, se existir
+local function resetToFirstImage()
+    currentImageIndex = 1 
+
+   
     if giraffeImage then
         giraffeImage:removeSelf()
     end
 
-    -- Exibe a primeira imagem
+    
     giraffeImage = display.newImageRect(
         scene.view,
         giraffeImages[currentImageIndex],
-        150, 200 -- Dimensões da imagem: altura maior que largura
+        150, 200
     )
     giraffeImage.x = display.contentCenterX
-    giraffeImage.y = display.contentHeight - 150 -- Mesma posição da imagem no p2
+    giraffeImage.y = display.contentHeight - 150 
 end
 
--- Função para alternar a imagem da girafa
 local function changeImage()
     currentImageIndex = currentImageIndex + 1
     if currentImageIndex > #giraffeImages then
         currentImageIndex = 1
     end
 
-    -- Remove a imagem atual, se existir
     if giraffeImage then
         giraffeImage:removeSelf()
     end
 
-    -- Exibe a nova imagem
     giraffeImage = display.newImageRect(
         scene.view,
         giraffeImages[currentImageIndex],
-        150, 200 -- Dimensões da imagem: altura maior que largura
+        150, 200 
     )
     giraffeImage.x = display.contentCenterX
-    giraffeImage.y = display.contentHeight - 150 -- Mesma posição da imagem no p2
+    giraffeImage.y = display.contentHeight - 150
 end
 
 -- create()
 function scene:create(event)
     local sceneGroup = self.view
 
-    -- Background com imagem
+    
     local background = display.newImageRect(
         sceneGroup,
-        "assets/p3/page3.png", -- Caminho para a imagem de fundo
+        "assets/p3/page3.png", 
         display.contentWidth,
         display.contentHeight
     )
     background.x = display.contentCenterX
     background.y = display.contentCenterY
 
-    -- Inicializa com a primeira imagem da girafa
     resetToFirstImage()
 
     -- Botão "Next"
@@ -95,17 +91,15 @@ end
 -- show()
 function scene:show(event)
     if event.phase == "will" then
-        -- Reseta para a primeira imagem antes de mostrar a cena
         resetToFirstImage()
     elseif event.phase == "did" then
-        -- Adiciona listener para detectar o shake
         local shakeListener = function(event)
             if event.isShake then
-                changeImage() -- Troca de imagem ao detectar o shake
+                changeImage()
             end
         end
 
-        -- Salva a referência ao listener para removê-lo depois
+       
         Runtime:addEventListener("accelerometer", shakeListener)
         self.shakeListener = shakeListener
     end
