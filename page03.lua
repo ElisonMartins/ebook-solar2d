@@ -1,7 +1,6 @@
 local composer = require("composer")
 local scene = composer.newScene()
 
-
 local currentImageIndex = 1
 local giraffeImages = {
     "assets/p3/girafa1.png",
@@ -10,17 +9,15 @@ local giraffeImages = {
     "assets/p3/girafa4.png"
 }
 local giraffeImage
-
+local instructionText
 
 local function resetToFirstImage()
     currentImageIndex = 1 
 
-   
     if giraffeImage then
         giraffeImage:removeSelf()
     end
 
-    
     giraffeImage = display.newImageRect(
         scene.view,
         giraffeImages[currentImageIndex],
@@ -53,7 +50,7 @@ end
 function scene:create(event)
     local sceneGroup = self.view
 
-    
+    -- Fundo
     local background = display.newImageRect(
         sceneGroup,
         "assets/p3/page3.png", 
@@ -63,6 +60,20 @@ function scene:create(event)
     background.x = display.contentCenterX
     background.y = display.contentCenterY
 
+    -- Texto de instruções
+    instructionText = display.newText({
+        parent = sceneGroup,
+        text = "Balance a tela para ver as próximas gerações da girafa.",
+        x = display.contentCenterX,
+        y = display.contentHeight - 280, -- Posicionando acima da imagem
+        width = display.contentWidth - 40,
+        font = native.systemFont,
+        fontSize = 12,
+        align = "center",
+    })
+    instructionText:setFillColor(0, 0, 0)
+
+    -- Reset da imagem inicial
     resetToFirstImage()
 
     -- Botão "Next"
@@ -99,7 +110,7 @@ function scene:show(event)
             end
         end
 
-       
+        -- Adiciona o listener para detectar o shake
         Runtime:addEventListener("accelerometer", shakeListener)
         self.shakeListener = shakeListener
     end
