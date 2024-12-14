@@ -3,7 +3,6 @@ local scene = composer.newScene()
 
 local backgroundAudio -- Variável para armazenar o áudio
 local audioPlaying = false -- Estado inicial do áudio
-local audioControlButton -- Botão de controle de áudio
 local birds = {} -- Lista de pássaros
 
 local function dragBird(event)
@@ -117,20 +116,28 @@ function scene:create(event)
     table.insert(birds, bird2)
 
     -- Botão Próximo
-    local btnNext = display.newImage(sceneGroup, "assets/BtnNext.png")
-    btnNext.x = display.contentWidth - 45
-    btnNext.y = display.contentHeight - 40
-    btnNext:scale(0.5, 0.5)
+    local btnNext = display.newGroup()
+    local nextButtonBackground = display.newImage(btnNext, "assets/BtnNext.png")
+    nextButtonBackground.x = display.contentWidth - 45
+    nextButtonBackground.y = display.contentHeight - 40
+    nextButtonBackground:scale(0.5, 0.5)
+    local nextButtonText = display.newText(btnNext, "Próximo", nextButtonBackground.x, nextButtonBackground.y + 30, native.systemFontBold, 12)
+    nextButtonText:setFillColor(0, 0, 0)
+    sceneGroup:insert(btnNext)
 
     btnNext:addEventListener("tap", function(event)
         composer.gotoScene("page06", { effect = "fade" })
     end)
 
     -- Botão Anterior
-    local btnPrev = display.newImage(sceneGroup, "assets/BtnLeft.png")
-    btnPrev.x = 45
-    btnPrev.y = display.contentHeight - 40
-    btnPrev:scale(0.5, 0.5)
+    local btnPrev = display.newGroup()
+    local prevButtonBackground = display.newImage(btnPrev, "assets/BtnLeft.png")
+    prevButtonBackground.x = 45
+    prevButtonBackground.y = display.contentHeight - 40
+    prevButtonBackground:scale(0.5, 0.5)
+    local prevButtonText = display.newText(btnPrev, "Anterior", prevButtonBackground.x, prevButtonBackground.y + 30, native.systemFontBold, 12)
+    prevButtonText:setFillColor(0, 0, 0)
+    sceneGroup:insert(btnPrev)
 
     btnPrev:addEventListener("tap", function(event)
         composer.gotoScene("page04", { effect = "fade" })

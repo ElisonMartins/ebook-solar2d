@@ -119,21 +119,29 @@ function scene:create(event)
         end
     end)
 
-    -- Botão "Next"
-    local btnNext = display.newImage(sceneGroup, "assets/BtnNext.png")
-    btnNext.x = display.contentWidth - 45
-    btnNext.y = display.contentHeight - 40
-    btnNext:scale(0.5, 0.5)
+    -- Botão "Próximo"
+    local btnNext = display.newGroup()
+    local nextButtonBackground = display.newImage(btnNext, "assets/BtnNext.png")
+    nextButtonBackground.x = display.contentWidth - 45
+    nextButtonBackground.y = display.contentHeight - 40
+    nextButtonBackground:scale(0.5, 0.5)
+    local nextButtonText = display.newText(btnNext, "Próximo", nextButtonBackground.x, nextButtonBackground.y + 30, native.systemFontBold, 12)
+    nextButtonText:setFillColor(0, 0, 0)
+    sceneGroup:insert(btnNext)
 
     btnNext:addEventListener("tap", function(event)
         composer.gotoScene("page04", { effect = "fade" })
     end)
 
-    -- Botão "Prev"
-    local btnPrev = display.newImage(sceneGroup, "assets/BtnLeft.png")
-    btnPrev.x = 40
-    btnPrev.y = display.contentHeight - 40
-    btnPrev:scale(0.5, 0.5)
+    -- Botão "Anterior"
+    local btnPrev = display.newGroup()
+    local prevButtonBackground = display.newImage(btnPrev, "assets/BtnLeft.png")
+    prevButtonBackground.x = 40
+    prevButtonBackground.y = display.contentHeight - 40
+    prevButtonBackground:scale(0.5, 0.5)
+    local prevButtonText = display.newText(btnPrev, "Anterior", prevButtonBackground.x, prevButtonBackground.y + 30, native.systemFontBold, 12)
+    prevButtonText:setFillColor(0, 0, 0)
+    sceneGroup:insert(btnPrev)
 
     btnPrev:addEventListener("tap", function(event)
         composer.gotoScene("page02")
