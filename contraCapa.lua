@@ -33,7 +33,7 @@ function scene:create(event)
     sceneGroup:insert(btnPrev)
 
     btnPrev:addEventListener("tap", function(event)
-        composer.gotoScene("page05", { effect = "fade" })
+        composer.gotoScene("page06", { effect = "fade" })
     end)
 
     -- Botão de Controle de Áudio

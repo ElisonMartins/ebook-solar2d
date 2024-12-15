@@ -1,9 +1,95 @@
 local composer = require("composer")
 local scene = composer.newScene()
 
+local dnaImage, dnaText
 local backgroundAudio -- Variável para armazenar o áudio
 local audioPlaying = false -- Estado inicial do áudio
 local audioControlText -- Texto do botão de controle de áudio
+
+system.activate("multitouch") -- Ativa o suporte multitouch
+
+local finger1, finger2
+local initialDistance
+local isZooming = false
+local zoomOccurred = false
+
+local zoomTexts = {
+    [1.0] = "O DNA é composto por nucleotídeos organizados em dupla hélice.",
+    [2.0] = "Mutações podem gerar características vantajosas ou prejudiciais.",
+}
+
+local function calculateDistance(x1, y1, x2, y2)
+    local dx = x2 - x1
+    local dy = y2 - y1
+    return math.sqrt(dx * dx + dy * dy)
+end
+
+local function updateZoomText(scale)
+    local closestScale = 1.0
+    for key, _ in pairs(zoomTexts) do
+        if scale >= key then
+            closestScale = key
+        end
+    end
+    dnaText.text = zoomTexts[closestScale]
+end
+
+local function resetImageScale()
+    dnaImage.xScale = 1
+    dnaImage.yScale = 1
+    dnaText.text = ""
+    dnaText.isVisible = false
+    zoomOccurred = false -- Reseta o estado de zoom
+end
+
+local function onTouch(event)
+    if event.phase == "began" then
+        if not finger1 then
+            finger1 = event
+        elseif not finger2 then
+            finger2 = event
+            isZooming = true
+            initialDistance = calculateDistance(finger1.x, finger1.y, finger2.x, finger2.y)
+        end
+    elseif event.phase == "moved" and isZooming then
+        if finger1 and finger2 and event.id == finger1.id then
+            finger1 = event
+        elseif finger1 and finger2 and event.id == finger2.id then
+            finger2 = event
+        end
+
+        if finger1 and finger2 then
+            local currentDistance = calculateDistance(finger1.x, finger1.y, finger2.x, finger2.y)
+            local scale = currentDistance / initialDistance
+            local newScaleX = dnaImage.xScale * scale
+            local newScaleY = dnaImage.yScale * scale
+
+            -- Limitar escala
+            if newScaleX <= 2.5 and newScaleX >= 0.7 then
+                dnaImage.xScale = newScaleX
+                dnaImage.yScale = newScaleY
+                zoomOccurred = true -- Marca que houve um zoom
+
+                -- Atualiza o texto com base no nível de zoom
+                updateZoomText(dnaImage.xScale)
+                dnaText.isVisible = true
+            end
+
+            initialDistance = currentDistance
+        end
+    elseif event.phase == "ended" or event.phase == "cancelled" then
+        if event.id == finger1.id then
+            finger1 = nil
+        elseif event.id == finger2.id then
+            finger2 = nil
+        end
+
+        if not finger1 or not finger2 then
+            isZooming = false
+        end
+    end
+    return true
+end
 
 -- create()
 function scene:create(event)
@@ -20,7 +106,7 @@ function scene:create(event)
     background.y = display.contentCenterY
 
     -- Imagem do DNA
-    local dnaImage = display.newImageRect(
+    dnaImage = display.newImageRect(
         sceneGroup,
         "assets/p6/dna.png",
         150, 150
@@ -28,18 +114,19 @@ function scene:create(event)
     dnaImage.x = display.contentCenterX
     dnaImage.y = display.contentCenterY + 50
 
-    -- Texto que será exibido ao dar zoom
-    local dnaText = display.newText({
+    -- Texto descritivo (inicialmente invisível)
+    dnaText = display.newText({
         parent = sceneGroup,
         text = "",
-        x = display.contentCenterX,
-        y = display.contentCenterY + 200,
+        x = dnaImage.x,
+        y = dnaImage.y + dnaImage.height / 2 + 20,
         width = display.contentWidth - 40,
         font = native.systemFont,
-        fontSize = 14,
+        fontSize = 10,
         align = "center",
     })
     dnaText:setFillColor(0, 0, 0)
+    dnaText.isVisible = false
 
     -- Botão "Próximo"
     local btnNextGroup = display.newGroup()
@@ -88,13 +175,7 @@ function scene:create(event)
     sceneGroup:insert(btnPrevGroup)
 
     -- Botão de Controle de Áudio
-    local buttonBackground = display.newRect(
-        sceneGroup,
-        display.contentCenterX,
-        display.contentHeight - 40,
-        120,
-        40
-    )
+    local buttonBackground = display.newRect(sceneGroup, display.contentCenterX, display.contentHeight - 40, 120, 40)
     buttonBackground:setFillColor(0.8, 0.8, 0.8)
     buttonBackground.strokeWidth = 2
     buttonBackground:setStrokeColor(0, 0, 0)
@@ -119,15 +200,14 @@ function scene:create(event)
             audio.stop()
             audioPlaying = true
             audioControlText.text = "Audio On"
-            audio.play(backgroundAudio, { loops = 0 }) -- Toca o áudio do início
+            audio.play(backgroundAudio, { loops = 0 })
         end
     end)
 end
 
--- show()
 function scene:show(event)
     if event.phase == "will" then
-        -- Carregar o áudio ao entrar na cena
+        Runtime:addEventListener("touch", onTouch)
         backgroundAudio = audio.loadStream("assets/p6/Audio-p6.mp3")
         audioPlaying = false
         audioControlText.text = "Audio Off"
@@ -136,7 +216,8 @@ end
 
 function scene:hide(event)
     if event.phase == "will" then
-        -- Parar o áudio ao sair da cena
+        Runtime:removeEventListener("touch", onTouch)
+        resetImageScale() -- Reseta a escala da imagem e o texto ao sair
         if audioPlaying then
             audio.stop()
             audioPlaying = false
@@ -145,14 +226,12 @@ function scene:hide(event)
 end
 
 function scene:destroy(event)
-    -- Liberar o áudio da memória
     if backgroundAudio then
         audio.dispose(backgroundAudio)
         backgroundAudio = nil
     end
 end
 
--- Eventos da cena
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
