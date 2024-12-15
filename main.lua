@@ -1,3 +1,3 @@
 local composer = require( "composer" )
  
-composer.gotoScene("page06")
+composer.gotoScene("capa")
